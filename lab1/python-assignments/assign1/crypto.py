@@ -33,9 +33,10 @@ def encrypt_vigenere(plaintext, keyword):
 
 
 def decrypt_vigenere(ciphertext, keyword):
+    keyword = keyword.upper()
     keyword *= math.ceil(len(ciphertext) / len(keyword))
     text = list(zip(ciphertext, keyword))
-    return ''.join(map(lambda x: chr(ord(x[0]) - ord(x[1]) + 65) if chr(ord(x[0]) - ord(x[1]) + 65) >= "A"
+    return ''.join(map(lambda x: x[0] if ord(x[0]) < 65 or ord(x[0]) > 90 else chr(ord(x[0]) - ord(x[1]) + 65) if chr(ord(x[0]) - ord(x[1]) + 65) >= "A"
     else chr(ord(x[0]) - ord(x[1]) + 65 + 26), text))
 
 ##################
@@ -199,6 +200,41 @@ def decrypt_mh(message, private_key):
     # Your implementation here.
     raise NotImplementedError('decrypt_mh is not yet implemented!')
 
+
+########################
+#INTELLIGEN CODEBREAKER#
+########################
+
+def codebreak_vigenere(ciphertext, possible_key):
+    f = open("american-english.txt", "r")
+    keytexts = f.readlines()
+    keytexts = [x.strip().upper() for x in keytexts]
+    # ciphertext = ciphertext.strip()
+    # print(ciphertext)
+    wordcount = 0
+    key = ''
+    plaintext = ''
+
+    for i in keytexts:
+        # print(i)
+        word_count = 0
+        text = decrypt_vigenere(ciphertext, i)
+        #print(text)
+        for j in keytexts:
+            if j.upper() in text:
+                word_count += 1
+            # print(word_count)
+            if(word_count > wordcount):
+                wordcount = word_count
+                key = j
+                plaintext = text
+                # print(word_count)
+                # print(key)
+                # print(plaintext)
+    print(plaintext)
+    print(key)
+    # print(keytexts)
+
 def initCaesar(codes, lenCodes):
     encryptedMsg = ''
     decryptedMsg = ''
@@ -243,6 +279,8 @@ def main():
 
     print(encrypt_railfence("WEAREDISCOVEREDFLEEATONCE", 3))
     print(decrypt_railfence("WECRLTEERDSOEEFEAOCAIVDEN", 3))
+
+    # codebreak_vigenere("BRG ACL! ZCPPCSC NHQ Q CFV FI TTCR KUUG GQI'IR CADGGKVANBKBX GBVA CGJVAAUGBK! FI, LWW'FV CLBJCPCL CABGFVFNRL VC JRY JPCH KUCF VQH JB MRKTSK ZYFACUV VM? NB VVZF JBQPH, Z'Z DHAV OUQCAO C ZFG IS BGLK FI GPCH ZG'M RIUWVE ZBZ ACL GI QMEFPCN GPKG. ZG QBZMG SRNGMT WW V LRAVOKR LRAVOKR LRAVOKR LRAVOKR LRAVOKR QBZFG KUUG ITS KUY FIOS CRHTBJ OJ GBR SGM (RAX, DCKHV UIAMUHCL, C JIPHVQ NB ACM IRJRIV, PLG NUM MSP UUF AGJVA FRBVSIF... NUMUOLEOF BQ HYR LRAEIV!). OOG EJOK NLR BJS FQXF GQI AHMG OWSJFYQ BJS BRS NVAKRL? QRTN, GZAWR GQI DNXR QV HYVM SIT, KYL XBV'V MFH GNSG O GECIIVS GBMG WP DZNTMI YWKU NUM USTEYG XJFRFY OWOPRFNVK ROIEIG IPR Z'YF TMV MFH U AQES 10 VKNEI DCEHM CWKBKF.", 1)
 
 if __name__ == "__main__":
     main()
