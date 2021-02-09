@@ -147,17 +147,20 @@ def communicate_with_client(clientId):
     s = sendHello(clientId, clientPubKey)
     halfSecret = crypto.generate_random_secret()
     sendHalfSecret(s, halfSecret, clientPubKey)
+    print('Sending halfSecret', halfSecret)
 
     # Getting the other half of the secret
     mess = recieve(s)
     mess = deserializeStringList(mess)
     secretPartTwo = crypto.decrypt_mh(mess, PRIVATE_KEY)
+    print('Got the other half secret', secretPartTwo)
 
     # generate_common_secret, init deck
     common_secret = crypto.generate_common_secret(halfSecret, secretPartTwo)
+    print('Generated the common secret', common_secret)
     deck = crypto.init_deck(common_secret)
+    print('Inited deck with common secret, inited deck:', deck)
     base_deck = deck.copy()
-    print(deck)
 
     # communicating with the other one
     myoffset = 0
@@ -167,11 +170,11 @@ def communicate_with_client(clientId):
         # Message to the other
         message = input('Message to ' + str(clientId) + ": ")
         encr_message, deck, myoffset = crypto.encrypt_message_solitaire(message, deck, myoffset)
-        print("DOLGOK: ", encr_message, deck, myoffset)
         mess = str.encode(str(myoffset - len(message)) + ':' + encr_message)
         s.send(mess)
 
         # Response message
+        print('Encrypted message from ' + str(clientId))
         messageFromOther = recieve(s).split(':')
         offset = int(messageFromOther[0])
         encMess = messageFromOther[1]
@@ -184,7 +187,7 @@ def communicate_with_client(clientId):
         if messageFromOther == 'bye' and message != 'bye':
             message = 'bye'
             encr_message, deck, myoffset = crypto.encrypt_message_solitaire(message, deck, myoffset)
-            mess = str.encode(str(myoffset) + ':' + encr_message)
+            mess = str.encode(str(myoffset - len(message)) + ':' + encr_message)
             s.send(mess)
 
 
@@ -219,16 +222,19 @@ def listening_for_communication():
         mess = recieve_as_server(conn)
         mess = deserializeStringList(mess)
         secretPartOne = crypto.decrypt_mh(mess, PRIVATE_KEY)
+        print('Got halfSecret', secretPartOne)
 
         # Sending the other part of the secret to the other one
+        print('Sending halfSecret', halfSecret)
         mess = crypto.encrypt_mh(halfSecret, clientPubKey)
         mess = str.encode(str(mess))
         conn.send(mess)
 
         # generate_common_secret, init deck
         common_secret = crypto.generate_common_secret(secretPartOne, halfSecret)
+        print('Generated the common secret', common_secret)
         deck = crypto.init_deck(common_secret)
-        print(deck)
+        print('Inited deck with common secret, inited deck:', deck)
         base_deck = deck.copy()
 
         # communicating with the other one
@@ -238,8 +244,8 @@ def listening_for_communication():
         while(messageFromOther != 'bye'):
 
             # Response message
+            print('Encrypted message from ' + str(clientId))
             messageFromOther = recieve_as_server(conn).split(':')
-            print(messageFromOther)
             offset = int(messageFromOther[0])
             encMess = messageFromOther[1]
             concreteMessage, deck, myoffset = crypto.decrypt_message_solitaire(encMess, deck, base_deck, offset, myoffset)
@@ -263,6 +269,7 @@ def listening_for_communication():
             conn.send(mess)
 
             if message == 'bye':
+                print('Encrypted message from ' + str(clientId))
                 messageFromOther = recieve_as_server(conn).split(':')
                 offset = int(messageFromOther[0])
                 encMess = messageFromOther[1]
