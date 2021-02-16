@@ -22,6 +22,10 @@ class KeyServerTest(TestCase):
         data = self.sendAndRecieve(mess)
         self.assertEqual('Succsessfuly registered', data)
 
+        mess = 'registerPubKey ' + str(self.id) + ' ' + str(self.publicKey)
+        data = self.sendAndRecieve(mess)
+        self.assertEqual('Succsessfuly updated the pubkey', data)
+
         mess = 'getUserIds'
         data = self.sendAndRecieve(mess)
         self.assertEqual('[' + str(self.id) + ']', data)
@@ -29,6 +33,10 @@ class KeyServerTest(TestCase):
         mess = 'getPublicKey ' + str(self.id)
         data = self.sendAndRecieve(mess)
         self.assertEqual(str(self.publicKey), data)
+
+        mess = 'getPublicKey ' + str(self.id + 1)
+        data = self.sendAndRecieve(mess)
+        self.assertEqual("Invalid id", data)
 
         mess = 'Exit'
         mess = str.encode(mess)

@@ -24,8 +24,9 @@ def process_response(conn):
     if cli_req.split(' ')[0] == 'registerPubKey':
         command_validity = 1
         try:
-            if cli_req.split(' ', 2)[1] in client_id:
-                index = client_id.index(cli_req.split(' ', 2)[1])
+            print(cli_req.split(' ', 2)[1], client_id)
+            if int(cli_req.split(' ', 2)[1]) in client_id:
+                index = client_id.index(int(cli_req.split(' ', 2)[1]))
                 client_public_key[index] = cli_req.split(' ', 2)[2]
                 conn.sendall(b'Succsessfuly updated the pubkey')
             else:
@@ -47,6 +48,10 @@ def process_response(conn):
                 index = client_id.index(int(cli_req.split(' ')[1]))
                 print(index)
                 mess = '' + str(client_public_key[index])
+                mess = str.encode(mess)
+                conn.sendall(mess)
+            else:
+                mess = 'Invalid id'
                 mess = str.encode(mess)
                 conn.sendall(mess)
         except Exception as e:
